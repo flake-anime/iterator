@@ -17,3 +17,8 @@ class TestIterator(unittest.TestCase):
     def test_get_a_to_z_list(self):
         result = self.iterator.get_a_to_z_list()
         self.assertGreater(len(result), 0)
+
+    def test_get_episodes(self):
+        anime_link = "https://ww2.gogoanimes.org/category/tribe-nine-dub"
+        result = self.iterator.get_episodes(anime_link)
+        self.assertGreater(len(result), 0)
