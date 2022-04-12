@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urlencode
 
 class Iterator:
     def __init__(self, base_url):
@@ -47,3 +48,35 @@ class Iterator:
             page_no += 1
         
         return a_to_z_list
+
+    def get_episodes(self, anime_link):
+        api_url = self.base_url + "/ajaxajax/load-list-episode"
+        
+        params = {
+            "alias": anime_link.replace(self.base_url, ""),
+            "ep_start": "0",
+            "ep_end": "",
+            "id": "",
+            "default_ep": "",
+        }
+        params = urlencode(params)
+
+        response = requests.get(api_url, params=params)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        episodes = []
+
+        episode_components = soup.select("li", href=True)
+        for component in episode_components:
+            episode_link = self.base_url + component.find("a")['href'].strip()
+            episode_name = component.find(class_="name").get_text()
+            episode_number = episode_name.replace("EP ", "")
+
+            episode = {
+                "ep": episode_number,
+                "link": episode_link,
+            }
+
+            episodes.append(episode)
+        
+        return episodes
