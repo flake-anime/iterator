@@ -1,6 +1,8 @@
+from platform import release
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
+from pprint import pprint
 
 class Iterator:
     def __init__(self, base_url):
@@ -80,3 +82,29 @@ class Iterator:
             episodes.append(episode)
         
         return episodes
+    
+    def get_extra_info(self, anime_link):
+        page = requests.get(anime_link)
+        soup = BeautifulSoup(page.content, 'html.parser')
+
+        anime_name = soup.select_one(".anime_info_body h1").get_text()
+        cover = soup.select_one(".anime_info_body img")['src']
+        type = soup.select_one(".anime_info_body .type a").get_text()
+        plot_summary = soup.select(".anime_info_body .type")[1].get_text().replace("Plot Summary: ", "")
+        genres = [genre.get_text() for genre in soup.select(".anime_info_body .type")[2].select("a")]
+        release = soup.select(".anime_info_body .type")[3].get_text().replace("Released: ", "")
+        status = soup.select(".anime_info_body .type")[4].get_text().replace("Status: ", "")
+        other_name = soup.select(".anime_info_body .type")[5].get_text().replace("Other name: ", "").strip()
+
+        anime = {
+            "anime_name": anime_name,
+            "cover": cover,
+            "type": type,
+            "plot_summary": plot_summary,
+            "genres": genres,
+            "release": release,
+            "status": status,
+            "other_name": other_name,
+        }
+
+        return anime
