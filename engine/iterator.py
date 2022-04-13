@@ -1,12 +1,12 @@
-from platform import release
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
-from pprint import pprint
+from jikanpy import Jikan
 
 class Iterator:
     def __init__(self, base_url):
         self.base_url = base_url
+        self.jikan = Jikan()
     
     def get_anime_list(self, page_no):
         page = requests.get(self.base_url + "/anime-list?page=" + str(page_no))
@@ -88,6 +88,7 @@ class Iterator:
         soup = BeautifulSoup(page.content, 'html.parser')
 
         anime_name = soup.select_one(".anime_info_body h1").get_text()
+        gogo_id = anime_link.split("/")[-1]
         cover = soup.select_one(".anime_info_body img")['src']
         type = soup.select_one(".anime_info_body .type a").get_text()
         plot_summary = soup.select(".anime_info_body .type")[1].get_text().replace("Plot Summary: ", "")
@@ -96,8 +97,15 @@ class Iterator:
         status = soup.select(".anime_info_body .type")[4].get_text().replace("Status: ", "")
         other_name = soup.select(".anime_info_body .type")[5].get_text().replace("Other name: ", "").strip()
 
+        anime_name_filtered = anime_name.replace("(Dub)", "").replace("(Sub)", "").strip()
+        best_match_mal_anime_info = self._get_best_match_mal_anime_info(anime_name_filtered)
+        trailer = best_match_mal_anime_info['trailer_url']
+        score = best_match_mal_anime_info['score']
+        mal_url = best_match_mal_anime_info['url']
+
         anime = {
             "anime_name": anime_name,
+            "gogo_id": gogo_id,
             "cover": cover,
             "type": type,
             "plot_summary": plot_summary,
@@ -105,6 +113,16 @@ class Iterator:
             "release": release,
             "status": status,
             "other_name": other_name,
+            "trailer": trailer,
+            "score": score,
+            "url": mal_url,
         }
+
+        return anime
+    
+    def _get_best_match_mal_anime_info(self, anime_name):
+        # Searching the anime and expanding on the top result
+        search_result = self.jikan.search('anime', anime_name, page=1)
+        anime = self.jikan.anime(search_result['results'][0]['mal_id'])
 
         return anime
