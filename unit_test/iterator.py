@@ -12,6 +12,8 @@ class TestIterator(unittest.TestCase):
         base_url = "https://ww2.gogoanimes.org"
 
         self.anime_link = "https://ww2.gogoanimes.org/category/death-note-dub"
+        self.episode_link = "https://ww2.gogoanimes.org/watch/death-note-dub-episode-1"
+
         self.iterator = Iterator(base_url)
 
         # Ignoring resourse warnings
@@ -49,4 +51,9 @@ class TestIterator(unittest.TestCase):
             'url': 'https://myanimelist.net/anime/2994/Death_Note__Rewrite'
         }
 
+        self.assertEqual(result, expected_result)
+    
+    def test_get_player_link(self):
+        result = self.iterator.get_player_link(self.episode_link)
+        expected_result = "https://ww.9anime2.com/embed/OTA3OTk="
         self.assertEqual(result, expected_result)
