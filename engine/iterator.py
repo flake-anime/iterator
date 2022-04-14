@@ -126,3 +126,10 @@ class Iterator:
         anime = self.jikan.anime(search_result['results'][0]['mal_id'])
 
         return anime
+    
+    def get_player_link(self, episode_link):
+        page = requests.get(episode_link)
+        soup = BeautifulSoup(page.content, 'html.parser')
+
+        player_link = soup.select_one(".play-video iframe")['src']
+        return player_link
