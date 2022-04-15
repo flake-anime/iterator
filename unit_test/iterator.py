@@ -55,5 +55,5 @@ class TestIterator(unittest.TestCase):
     
     def test_get_player_link(self):
         result = self.iterator.get_player_link(self.episode_link)
-        expected_result = "https://ww.9anime2.com/embed/OTA3OTk="
+        expected_result = "http://goload.pro/streaming.php?id=OTA3OTk=&title=Death+Note+%28Dub%29&typesub=SUB&sub=&cover=Y292ZXIvZGVhdGgtbm90ZS1kdWIucG5n"
         self.assertEqual(result, expected_result)

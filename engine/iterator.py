@@ -2,21 +2,23 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
 from jikanpy import Jikan
+import validators
 
 class Iterator:
-    def __init__(self, base_url):
-        self.base_url = base_url
+    def __init__(self):
+        self.gogo_base_url = "https://ww2.gogoanimes.org"
+        self.vidstream_base_url = "https://gogoplay4.com"
         self.jikan = Jikan()
     
     def get_anime_list(self, page_no):
-        page = requests.get(self.base_url + "/anime-list?page=" + str(page_no))
+        page = requests.get(self.gogo_base_url + "/anime-list?page=" + str(page_no))
         soup = BeautifulSoup(page.content, 'html.parser')
         anime_components = soup.select(".listing li a", href=True)
 
         anime_list = []
         for component in anime_components:
             anime_name = component.get_text()
-            anime_url = self.base_url + component['href']
+            anime_url = self.gogo_base_url + component['href']
 
             anime = {
                 "name": anime_name,
@@ -52,10 +54,10 @@ class Iterator:
         return a_to_z_list
 
     def get_episodes(self, anime_link):
-        api_url = self.base_url + "/ajaxajax/load-list-episode"
+        api_url = self.gogo_base_url + "/ajaxajax/load-list-episode"
         
         params = {
-            "alias": anime_link.replace(self.base_url, ""),
+            "alias": anime_link.replace(self.gogo_base_url, ""),
             "ep_start": "0",
             "ep_end": "",
             "id": "",
@@ -70,7 +72,7 @@ class Iterator:
 
         episode_components = soup.select("li", href=True)
         for component in episode_components:
-            episode_link = self.base_url + component.find("a")['href'].strip()
+            episode_link = self.gogo_base_url + component.find("a")['href'].strip()
             episode_name = component.find(class_="name").get_text()
             episode_number = episode_name.replace("EP ", "")
 
@@ -128,8 +130,19 @@ class Iterator:
         return anime
     
     def get_player_link(self, episode_link):
-        page = requests.get(episode_link)
+        gogo_episode_id = episode_link.split("/")[-1]
+        vidstream_url = self.vidstream_base_url + "/videos/" + gogo_episode_id
+
+        page = requests.get(vidstream_url)
         soup = BeautifulSoup(page.content, 'html.parser')
 
         player_link = soup.select_one(".play-video iframe")['src']
+        player_link = "http:" + player_link
+
+        if not validators.url(player_link):
+            raise Exception("Invalid player link")
+
         return player_link
+    
+    # def get_download_lin(self, player_link):
+        
