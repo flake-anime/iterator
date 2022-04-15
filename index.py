@@ -2,7 +2,7 @@ from engine.iterator import Iterator
 
 iterator = Iterator()
 
-episode_link = "https://ww2.gogoanimes.org/watch/death-note-dub-episode-1" 
-result = iterator.get_player_link(episode_link)
+player_link = "http://goload.pro/streaming.php?id=OTA3OTk=&title=Death+Note+%28Dub%29&typesub=SUB&sub=&cover=Y292ZXIvZGVhdGgtbm90ZS1kdWIucG5n" 
+result = iterator.get_download_link(player_link)
 
 print(result)
