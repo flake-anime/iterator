@@ -27,9 +27,9 @@ class TestIterator(unittest.TestCase):
         result = self.iterator.get_anime_list(1)
         self.assertGreater(len(result), 0)
     
-    # def test_get_a_to_z_list(self):
-    #     result = self.iterator.get_a_to_z_list()
-    #     self.assertGreater(len(result), 0)
+    def test_get_a_to_z_list(self):
+        result = self.iterator.get_a_to_z_list(1, 2)
+        self.assertGreater(len(result), 0)
 
     def test_get_episodes(self):
         result = self.iterator.get_episodes(self.anime_link)

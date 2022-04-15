@@ -1,6 +1,4 @@
-from re import sub
 import requests
-from yfinance import download
 import validators
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
@@ -42,13 +40,16 @@ class Iterator:
 
         return anime_list
 
-    def get_a_to_z_list(self, log = False):
-        page_no = 1
+    def get_a_to_z_list(self, start_page, end_page, log = False):
+        page_no = start_page
 
         a_to_z_list = []
         prev_a_to_z_list = 0
 
         while True:
+            if page_no == end_page:
+                break
+
             if log:
                 print("[*] Getting page " + str(page_no))
 

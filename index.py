@@ -1,8 +1,6 @@
 from engine.iterator import Iterator
 
 iterator = Iterator()
+anime_data = iterator.get_a_to_z_list(1, 2)
 
-anime_link = "https://ww2.gogoanimes.org/category/death-note-dub"
-result = iterator.get_episodes(anime_link)
-
-print(result)
+print(anime_data)
