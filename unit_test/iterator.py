@@ -8,27 +8,28 @@ tracemalloc.start()
 
 class TestIterator(unittest.TestCase):
 
-    def setUp(self):
-        base_url = "https://ww2.gogoanimes.org"
-
+    @classmethod
+    def setUpClass(self):
         self.anime_link = "https://ww2.gogoanimes.org/category/death-note-dub"
         self.episode_link = "https://ww2.gogoanimes.org/watch/death-note-dub-episode-1"
+        self.player_link = "http://goload.pro/streaming.php?id=OTA3OTk=&title=Death+Note+%28Dub%29&typesub=SUB&sub=&cover=Y292ZXIvZGVhdGgtbm90ZS1kdWIucG5n"
 
-        self.iterator = Iterator(base_url)
+        self.iterator = Iterator()
 
         # Ignoring resourse warnings
         warnings.simplefilter("ignore", ResourceWarning)
     
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(self):
         del self.iterator
 
     def test_get_anime_list(self):
         result = self.iterator.get_anime_list(1)
         self.assertGreater(len(result), 0)
     
-    def test_get_a_to_z_list(self):
-        result = self.iterator.get_a_to_z_list()
-        self.assertGreater(len(result), 0)
+    # def test_get_a_to_z_list(self):
+    #     result = self.iterator.get_a_to_z_list()
+    #     self.assertGreater(len(result), 0)
 
     def test_get_episodes(self):
         result = self.iterator.get_episodes(self.anime_link)
@@ -56,4 +57,9 @@ class TestIterator(unittest.TestCase):
     def test_get_player_link(self):
         result = self.iterator.get_player_link(self.episode_link)
         expected_result = "http://goload.pro/streaming.php?id=OTA3OTk=&title=Death+Note+%28Dub%29&typesub=SUB&sub=&cover=Y292ZXIvZGVhdGgtbm90ZS1kdWIucG5n"
+        self.assertEqual(result, expected_result)
+
+    def test_get_download_link(self):
+        result = self.iterator.get_download_link(self.player_link)
+        expected_result = "http://goload.pro/download?id=OTA3OTk%3D&title=Death+Note+%28Dub%29&typesub=SUB&cover=Y292ZXIvZGVhdGgtbm90ZS1kdWIucG5n"
         self.assertEqual(result, expected_result)

@@ -8,12 +8,21 @@ from jikanpy import Jikan
 from urllib.parse import urlparse, urlunparse
 from urllib.parse import parse_qs
 
+def retry_on_connection_fail(function):
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except requests.exceptions.ConnectionError:
+            return wrapper(*args, **kwargs)
+    return wrapper
+
 class Iterator:
     def __init__(self):
         self.gogo_base_url = "https://ww2.gogoanimes.org"
         self.vidstream_base_url = "https://gogoplay4.com"
         self.jikan = Jikan()
     
+    @retry_on_connection_fail
     def get_anime_list(self, page_no):
         page = requests.get(self.gogo_base_url + "/anime-list?page=" + str(page_no))
         soup = BeautifulSoup(page.content, 'html.parser')
@@ -57,6 +66,7 @@ class Iterator:
         
         return a_to_z_list
 
+    @retry_on_connection_fail
     def get_episodes(self, anime_link):
         api_url = self.gogo_base_url + "/ajaxajax/load-list-episode"
         
@@ -89,6 +99,7 @@ class Iterator:
         
         return episodes
     
+    @retry_on_connection_fail
     def get_extra_info(self, anime_link):
         page = requests.get(anime_link)
         soup = BeautifulSoup(page.content, 'html.parser')
@@ -133,6 +144,7 @@ class Iterator:
 
         return anime
     
+    @retry_on_connection_fail
     def get_player_link(self, episode_link):
         gogo_episode_id = episode_link.split("/")[-1]
         vidstream_url = self.vidstream_base_url + "/videos/" + gogo_episode_id
@@ -148,6 +160,7 @@ class Iterator:
 
         return player_link
     
+    @retry_on_connection_fail
     def get_download_link(self, player_link):
         parsed_player_link = urlparse(player_link)
 
