@@ -6,5 +6,5 @@ class Database:
         self.client = MongoClient(connection_string)
         self.db = self.client.anime_database
 
-    def insert_data(self, data):
+    def insert_anime(self, data):
         self.db.anime_collection.insert_one(data)

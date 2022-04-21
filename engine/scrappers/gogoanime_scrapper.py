@@ -126,7 +126,7 @@ class GogoAnimeScrapper:
         other_name = [ name.strip() for name in soup.select(".anime_info_body .type")[5].get_text().replace("Other name: ", "").replace("\n", "").split(";") ]
 
         anime_name_filtered = anime_name.replace("(Dub)", "").replace("(Sub)", "").strip()
-        best_match_mal_anime_info = self._get_best_match_mal_anime_info(anime_name_filtered)
+        best_match_mal_anime_info = self._get_best_match_mal_anime_info(anime_name_filtered, proxies)
         trailer = best_match_mal_anime_info['trailer_url']
         score = best_match_mal_anime_info['score']
         mal_url = best_match_mal_anime_info['url']
@@ -148,13 +148,58 @@ class GogoAnimeScrapper:
 
         return anime
     
-    @api_exception_retry
-    def _get_best_match_mal_anime_info(self, anime_name):
+    @connection_fail_retry
+    def _get_best_match_mal_anime_info(self, anime_name, proxies = None):
         # Searching the anime and expanding on the top result
-        search_result = self.jikan.search('anime', anime_name, page=1)
-        anime = self.jikan.anime(search_result['results'][0]['mal_id'])
+        mal_id = self._get_best_match_mal_id(anime_name, proxies)
+        mal_anime_info = self._get_mal_info(mal_id, proxies)
+        return mal_anime_info
+    
+    @connection_fail_retry
+    def _get_best_match_mal_id(self, anime_name, proxies = None):
+        # Getting best matched mal id from the anime name
+        base_url = "https://myanimelist.net/search/all"
+        params = {
+            "q": anime_name,
+            "cat": "all",
+        }
 
-        return anime
+        page = requests.get(base_url, params=params, proxies=proxies)
+        soup = BeautifulSoup(page.content, 'html.parser')
+
+
+        top_result_mal_link = soup.select_one(".picSurround a", href=True)
+        if top_result_mal_link is None:
+            return None
+
+        top_result_mal_link = top_result_mal_link['href']
+        mal_id = top_result_mal_link.split("/")[-2]
+
+        return mal_id
+
+    @connection_fail_retry
+    def _get_mal_info(self, mal_id, proxies = None):
+        # Getting the anime info from the mal id
+        mal_url = "https://myanimelist.net/anime/" + str(mal_id)
+
+        page = requests.get(mal_url, proxies=proxies)
+        soup = BeautifulSoup(page.content, 'html.parser')
+
+        trailer = soup.select_one(".iframe")
+        if trailer is not None:
+            trailer = trailer["href"]
+
+        score = soup.select_one(".score-label")
+        if score is not None:
+            score = score.get_text()
+
+        mal_anime = {
+            "trailer_url": trailer,
+            "score": score,
+            "url": mal_url,
+        }
+
+        return mal_anime
     
     @connection_fail_retry
     def get_player_link(self, episode_link, proxies = None):
