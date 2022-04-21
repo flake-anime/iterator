@@ -3,16 +3,19 @@ from dotenv import load_dotenv
 from database import Database
 from engine.iterator import Iterator
 from database import Database
-from engine.proxy import get_random_proxy
+from engine.free_proxy_wrapper import FreeProxyListWrapper
 load_dotenv()
 
 connection_string = os.getenv("MONGO_CONNECTION_STRING")
+
 database = Database(connection_string)
 iterator = Iterator()
+proxy = FreeProxyListWrapper()
+
 anime_data = iterator.get_a_to_z_list(1, 2, log=True)
 
 for anime in anime_data:
-    proxy_ip = get_random_proxy()
+    proxy_ip = proxy.get_random_proxy()
 
     proxies = {
         "http": proxy_ip,
