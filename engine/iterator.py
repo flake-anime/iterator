@@ -18,7 +18,10 @@ def get_complete_anime_info(anime_link, proxies = None):
         episode_link = episode_link['episode_link']
 
         player_link = scrapper.get_player_link(episode_link, proxies)
-        download_link = scrapper.get_download_link(player_link)
+
+        download_link = None
+        if player_link is not None:
+            download_link = scrapper.get_download_link(player_link)
 
         episode = {
             "episode_number": episode_number,

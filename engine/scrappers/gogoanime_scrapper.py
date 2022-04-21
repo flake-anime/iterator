@@ -164,11 +164,11 @@ class GogoAnimeScrapper:
         page = requests.get(vidstream_url, proxies=proxies)
         soup = BeautifulSoup(page.content, 'html.parser')
 
-        player_link = soup.select_one(".play-video iframe")['src']
-        player_link = "http:" + player_link
+        player_link = soup.select_one(".play-video iframe")
 
-        if not validators.url(player_link):
-            raise Exception("Invalid player link")
+        if player_link is not None:
+            player_link = player_link['src']
+            player_link = "http:" + player_link if not validators.url(player_link) else player_link
 
         return player_link
     

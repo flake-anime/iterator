@@ -1,8 +1,6 @@
-from engine.iterator import Iterator
-
-iterator = Iterator()
+from engine.iterator import get_complete_anime_info
 
 anime_link = "https://ww2.gogoanimes.org/category/009-1"
-player_link = iterator.get_player_link(episode_link)
+anime_data = get_complete_anime_info(anime_link)
 
-print(player_link)
+print(anime_data)
