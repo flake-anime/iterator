@@ -177,13 +177,13 @@ class GogoAnimeScrapper:
         soup = BeautifulSoup(page.content, 'html.parser')
 
         top_result_mal_link = soup.select_one(".picSurround a", href=True)
-        if top_result_mal_link is None:
-            return None
+        if top_result_mal_link is not None:
+            top_result_mal_link = top_result_mal_link['href']
+            mal_id = top_result_mal_link.split("/")[-2]
 
-        top_result_mal_link = top_result_mal_link['href']
-        mal_id = top_result_mal_link.split("/")[-2]
-
-        return mal_id
+            return mal_id
+        
+        return None
 
     @connection_fail_retry
     def _get_mal_info(self, mal_id, proxies = None):
