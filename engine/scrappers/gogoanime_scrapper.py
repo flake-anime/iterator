@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from jikanpy import Jikan
 from urllib.parse import urlparse, urlunparse
 from urllib.parse import parse_qs
+from engine.wrappers.free_proxy_wrapper import FreeProxyListWrapper
 
 def connection_fail_retry(function):
     def wrapper(*args, **kwargs):
@@ -29,6 +30,7 @@ class GogoAnimeScrapper:
         self.gogo_base_url = "https://ww2.gogoanimes.org"
         self.vidstream_base_url = "https://gogoplay4.com"
         self.jikan = Jikan()
+        self.proxy = FreeProxyListWrapper()
     
     @connection_fail_retry
     def get_anime_list(self, page_no, proxies = None):
@@ -50,18 +52,25 @@ class GogoAnimeScrapper:
 
         return anime_list
 
-    def get_a_to_z_list(self, start_page, end_page, log = False, proxies = None):
+    def get_a_to_z_list(self, start_page, end_page, log = False, proxy = False):
         page_no = start_page
 
         a_to_z_list = []
         prev_a_to_z_list = 0
 
+        proxies = None
+
         while True:
             if page_no == end_page:
                 break
 
+            if proxy:
+                proxies = {
+                    "http": self.proxy.get_random_proxy()
+                }
+
             if log:
-                print("[*] Getting page " + str(page_no))
+                print("[{}/{}] Getting page using proxy {} ...".format(page_no, end_page, proxies["http"] if proxies else "None"))
 
             anime_list = self.get_anime_list(page_no, proxies = proxies)
 
