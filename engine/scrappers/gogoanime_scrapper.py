@@ -176,7 +176,6 @@ class GogoAnimeScrapper:
         page = requests.get(base_url, params=params, proxies=proxies)
         soup = BeautifulSoup(page.content, 'html.parser')
 
-
         top_result_mal_link = soup.select_one(".picSurround a", href=True)
         if top_result_mal_link is None:
             return None

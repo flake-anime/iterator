@@ -49,3 +49,7 @@ if __name__ == "__main__":
             total =len(anime_list)
         ):
             database.insert_anime(anime_data)
+    
+    print("[+] Complete")
+    while True:
+        pass
