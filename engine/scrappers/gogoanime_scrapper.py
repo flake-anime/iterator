@@ -70,7 +70,7 @@ class GogoAnimeScrapper:
                 }
 
             if log:
-                print("[{}/{}] Getting page using proxy {} ...".format(page_no, end_page, proxies["http"] if proxies else "None"))
+                print("[{}/{}] Getting anime list page using proxy {} ...".format(page_no, end_page, proxies["http"] if proxies else "None"))
 
             anime_list = self.get_anime_list(page_no, proxies = proxies)
 

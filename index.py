@@ -20,7 +20,7 @@ anime_list = get_a_to_z_list(
     start_page = START_PAGE, 
     end_page = END_PAGE, 
     log = True,
-    proxy = False
+    proxy = True
 )
 
 def expand_on_anime_from_anime_list_and_upload_to_database(anime, log = False):
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     print("[*] Starting the thread pool")
 
-    with ThreadPoolExecutor(max_workers=1000) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         for anime_data in tqdm(
             executor.map(expand_on_anime_from_anime_list_and_upload_to_database, anime_list), 
             desc ="Crawling Data", 

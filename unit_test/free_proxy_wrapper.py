@@ -1,6 +1,5 @@
 import unittest
 import tracemalloc
-import warnings
 from engine.wrappers.free_proxy_wrapper import FreeProxyListWrapper
 
 tracemalloc.start()
