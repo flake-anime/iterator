@@ -1,3 +1,5 @@
+from pydoc import pager
+import jikanpy
 import requests
 import validators
 from bs4 import BeautifulSoup
@@ -6,11 +8,20 @@ from jikanpy import Jikan
 from urllib.parse import urlparse, urlunparse
 from urllib.parse import parse_qs
 
-def retry_on_connection_fail(function):
+def connection_fail_retry(function):
     def wrapper(*args, **kwargs):
         try:
             return function(*args, **kwargs)
         except requests.exceptions.ConnectionError:
+            return wrapper(*args, **kwargs)
+    return wrapper
+
+def api_exception_retry(function):
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except jikanpy.exceptions.APIException:
+            print("[-] APIException, retrying...")
             return wrapper(*args, **kwargs)
     return wrapper
 
@@ -20,9 +31,9 @@ class Iterator:
         self.vidstream_base_url = "https://gogoplay4.com"
         self.jikan = Jikan()
     
-    @retry_on_connection_fail
-    def get_anime_list(self, page_no):
-        page = requests.get(self.gogo_base_url + "/anime-list?page=" + str(page_no))
+    @connection_fail_retry
+    def get_anime_list(self, page_no, proxies = None):
+        page = requests.get(self.gogo_base_url + "/anime-list?page=" + str(page_no), proxies=proxies)
         soup = BeautifulSoup(page.content, 'html.parser')
         anime_components = soup.select(".listing li a", href=True)
 
@@ -40,7 +51,7 @@ class Iterator:
 
         return anime_list
 
-    def get_a_to_z_list(self, start_page, end_page, log = False):
+    def get_a_to_z_list(self, start_page, end_page, log = False, proxies = None):
         page_no = start_page
 
         a_to_z_list = []
@@ -53,7 +64,7 @@ class Iterator:
             if log:
                 print("[*] Getting page " + str(page_no))
 
-            anime_list = self.get_anime_list(page_no)
+            anime_list = self.get_anime_list(page_no, proxies = proxies)
 
             for anime in anime_list:
                 if not anime in a_to_z_list:
@@ -67,8 +78,8 @@ class Iterator:
         
         return a_to_z_list
 
-    @retry_on_connection_fail
-    def get_episodes(self, anime_link):
+    @connection_fail_retry
+    def get_episodes(self, anime_link, proxies = None):
         api_url = self.gogo_base_url + "/ajaxajax/load-list-episode"
         
         params = {
@@ -80,7 +91,7 @@ class Iterator:
         }
         params = urlencode(params)
 
-        response = requests.get(api_url, params=params)
+        response = requests.get(api_url, params=params, proxies=proxies)
         soup = BeautifulSoup(response.content, 'html.parser')
         
         episodes = []
@@ -92,17 +103,17 @@ class Iterator:
             episode_number = episode_name.replace("EP ", "")
 
             episode = {
-                "ep": episode_number,
-                "link": episode_link,
+                "episode_number": episode_number,
+                "episode_link": episode_link,
             }
 
             episodes.append(episode)
         
         return episodes
     
-    @retry_on_connection_fail
-    def get_extra_info(self, anime_link):
-        page = requests.get(anime_link)
+    @connection_fail_retry
+    def get_extra_info(self, anime_link, proxies = None):
+        page = requests.get(anime_link, proxies=proxies)
         soup = BeautifulSoup(page.content, 'html.parser')
 
         anime_name = soup.select_one(".anime_info_body h1").get_text()
@@ -112,8 +123,8 @@ class Iterator:
         plot_summary = soup.select(".anime_info_body .type")[1].get_text().replace("Plot Summary: ", "")
         genres = [genre.get_text() for genre in soup.select(".anime_info_body .type")[2].select("a")]
         release = soup.select(".anime_info_body .type")[3].get_text().replace("Released: ", "")
-        status = soup.select(".anime_info_body .type")[4].get_text().replace("Status: ", "")
-        other_name = soup.select(".anime_info_body .type")[5].get_text().replace("Other name: ", "").strip()
+        status = soup.select(".anime_info_body .type")[4].get_text().replace("Status: ", "").strip()
+        other_name = [ name.strip() for name in soup.select(".anime_info_body .type")[5].get_text().replace("Other name: ", "").replace("\n", "").split(";") ]
 
         anime_name_filtered = anime_name.replace("(Dub)", "").replace("(Sub)", "").strip()
         best_match_mal_anime_info = self._get_best_match_mal_anime_info(anime_name_filtered)
@@ -138,6 +149,7 @@ class Iterator:
 
         return anime
     
+    @api_exception_retry
     def _get_best_match_mal_anime_info(self, anime_name):
         # Searching the anime and expanding on the top result
         search_result = self.jikan.search('anime', anime_name, page=1)
@@ -145,12 +157,12 @@ class Iterator:
 
         return anime
     
-    @retry_on_connection_fail
-    def get_player_link(self, episode_link):
+    @connection_fail_retry
+    def get_player_link(self, episode_link, proxies = None):
         gogo_episode_id = episode_link.split("/")[-1]
         vidstream_url = self.vidstream_base_url + "/videos/" + gogo_episode_id
 
-        page = requests.get(vidstream_url)
+        page = requests.get(vidstream_url, proxies=proxies)
         soup = BeautifulSoup(page.content, 'html.parser')
 
         player_link = soup.select_one(".play-video iframe")['src']
@@ -161,7 +173,7 @@ class Iterator:
 
         return player_link
     
-    @retry_on_connection_fail
+    @connection_fail_retry
     def get_download_link(self, player_link):
         parsed_player_link = urlparse(player_link)
 

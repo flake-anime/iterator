@@ -1,11 +1,8 @@
-import requests
+from engine.iterator import Iterator
 
-http_proxy  = "http://197.149.247.82:8080"
+iterator = Iterator()
 
-proxies = { 
-              "http"  : http_proxy, 
-            }
+episode_link = "https://ww2.gogoanimes.org/watch/009-1-dub-episode-1"
+player_link = iterator.get_player_link(episode_link)
 
-url = "http://httpbin.org/ip"
-r = requests.get(url, proxies=proxies)
-print(r.json()["origin"])
+print(player_link)

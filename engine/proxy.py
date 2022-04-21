@@ -1,4 +1,6 @@
-proxy_list = [
+import random
+
+PROXIES = [
     "185.24.233.208:80",
     "80.48.119.28:8080",
     "169.57.1.85:8123",
@@ -300,3 +302,6 @@ proxy_list = [
     "154.92.112.93:5114",
     "192.177.186.66:3128",
 ]
+
+def get_random_proxy():
+    return random.choice(PROXIES)

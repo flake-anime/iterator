@@ -3,16 +3,43 @@ from dotenv import load_dotenv
 from database import Database
 from engine.iterator import Iterator
 from database import Database
-import json
+from engine.proxy import get_random_proxy
+load_dotenv()
 
 connection_string = os.getenv("MONGO_CONNECTION_STRING")
 database = Database(connection_string)
 iterator = Iterator()
 anime_data = iterator.get_a_to_z_list(1, 2, log=True)
 
-database = Database("mongodb+srv://animeParadise:Paradise%40anime%3A%2F%2F@anime-paradise.ucpde.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+for anime in anime_data:
+    proxy_ip = get_random_proxy()
 
-for counter, anime in enumerate(anime_data):
-    data = iterator.get_extra_info(anime["url"])
-    database.insert_data(data)
-    print(f"[*] {counter}/{len(anime_data)}")
+    proxies = {
+        "http": proxy_ip,
+    }
+
+    anime_name = anime['name']
+    anime_link = anime['url']
+    
+    print("[*] Getting episodes for " + anime_name + " using proxy " + proxy_ip)
+
+    extra_info = iterator.get_extra_info(anime_link, proxies)
+    episode_links = iterator.get_episodes(anime_link, proxies)
+    
+    episodes = []
+
+    for episode_link in episode_links:
+        episode_number = episode_link['episode_number']
+        episode_link = episode_link['episode_link']
+        player_link = iterator.get_player_link(episode_link, proxies)
+        download_link = iterator.get_download_link(player_link)
+
+        episode = {
+            "episode_number": episode_number,
+            "episode_link": episode_link,
+            "player_link": player_link,
+            "download_link": download_link,
+        }
+
+        episodes.append(episode)
+
