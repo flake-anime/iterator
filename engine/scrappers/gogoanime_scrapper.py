@@ -218,6 +218,7 @@ class GogoAnimeScrapper:
     
     @connection_fail_retry
     def get_download_link(self, player_link):
+        print(player_link)
         parsed_player_link = urlparse(player_link)
 
         base_url = urlparse(player_link)
