@@ -218,23 +218,28 @@ class GogoAnimeScrapper:
     
     @connection_fail_retry
     def get_download_link(self, player_link):
-        print(player_link)
-        parsed_player_link = urlparse(player_link)
+        try:
+            parsed_player_link = urlparse(player_link)
 
-        base_url = urlparse(player_link)
-        base_url = base_url.scheme + "://" + base_url.netloc
+            base_url = urlparse(player_link)
+            base_url = base_url.scheme + "://" + base_url.netloc
 
-        params = {
-            "id": parse_qs(parsed_player_link.query)['id'][0],
-            "title": parse_qs(parsed_player_link.query)['title'][0],
-            "typesub": parse_qs(parsed_player_link.query)['typesub'][0],
-            "cover": parse_qs(parsed_player_link.query)['cover'][0],
-        }
+            params = {
+                "id": parse_qs(parsed_player_link.query)['id'][0],
+                "title": parse_qs(parsed_player_link.query)['title'][0],
+                "typesub": parse_qs(parsed_player_link.query)['typesub'][0],
+                "cover": parse_qs(parsed_player_link.query)['cover'][0],
+            }
 
-        download_link = urlparse(base_url + "/download")
-        encoded_params = urlencode(params)
-        download_link = download_link._replace(query=encoded_params)
-        download_link = urlunparse(download_link)
+            download_link = urlparse(base_url + "/download")
+            encoded_params = urlencode(params)
+            download_link = download_link._replace(query=encoded_params)
+            download_link = urlunparse(download_link)
 
-        return download_link
+            return download_link
+        except Exception as e:
+            print(e)
+            print("player_link: " + player_link)
+            while True:
+                pass
         
