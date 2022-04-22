@@ -225,10 +225,10 @@ class GogoAnimeScrapper:
             base_url = base_url.scheme + "://" + base_url.netloc
 
             params = {
-                "id": parse_qs(parsed_player_link.query)['id'][0] if "id" in parse_qs(parsed_player_link.query).keys() else None,
-                "title": parse_qs(parsed_player_link.query)['title'][0] if "title" in parse_qs(parsed_player_link.query).keys() else None,
-                "typesub": parse_qs(parsed_player_link.query)['typesub'][0] if "typesub" in parse_qs(parsed_player_link.query).keys() else None,
-                "cover": parse_qs(parsed_player_link.query)['cover'][0] if "cover" in parse_qs(parsed_player_link.query).keys() else None,
+                "id": parse_qs(parsed_player_link.query)['id'][0] if "id" in parse_qs(parsed_player_link.query).keys() else "",
+                "title": parse_qs(parsed_player_link.query)['title'][0] if "title" in parse_qs(parsed_player_link.query).keys() else "",
+                "typesub": parse_qs(parsed_player_link.query)['typesub'][0] if "typesub" in parse_qs(parsed_player_link.query).keys() else "",
+                "cover": parse_qs(parsed_player_link.query)['cover'][0] if "cover" in parse_qs(parsed_player_link.query).keys() else "",
             }
 
             download_link = urlparse(base_url + "/download")

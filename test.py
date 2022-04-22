@@ -1,6 +1,8 @@
-from engine.iterator import get_complete_anime_info
+from engine.scrappers.gogoanime_scrapper import GogoAnimeScrapper
 
-anime_link = "https://ww2.gogoanimes.org/category/captain-harlock-2013"
-anime_data = get_complete_anime_info(anime_link)
+scrapper = GogoAnimeScrapper()
 
-print(anime_data)
+player_link = "http://goload.pro/streaming.php?id=NDYyNjE=&title=&typesub=SUB&sub=&cover=aW1hZ2VzL2FuaW1lL0QvMzE0MzMuanBn"
+download_link = scrapper.get_download_link(player_link)
+
+print(download_link)
