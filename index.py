@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from database import Database
 from engine.iterator import get_complete_anime_info
-from engine.iterator import get_a_to_z_list
+from engine.scrappers.gogoanime_scrapper import GogoAnimeScrapper
 from database import Database
 from engine.wrappers.free_proxy_wrapper import FreeProxyListWrapper
 from concurrent.futures import ThreadPoolExecutor
@@ -14,9 +14,10 @@ END_PAGE = int(os.getenv("END_PAGE"))
 MAX_WORKERS = int(os.getenv("MAX_WORKERS"))
 
 database = Database(CONNECTION_STRING)
+scrapper = GogoAnimeScrapper()
 proxy = FreeProxyListWrapper()
 
-anime_list = get_a_to_z_list(
+anime_list = scrapper.get_a_to_z_list(
     start_page = START_PAGE, 
     end_page = END_PAGE, 
     max_workers = MAX_WORKERS,

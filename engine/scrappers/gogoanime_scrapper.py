@@ -66,14 +66,14 @@ class GogoAnimeScrapper:
             page_complete = 0
             arguments = [i for i in range(start_page, end_page + 1)]
             for anime_list, proxy_ip in executor.map(self.get_anime_list, arguments):
-                if log:
-                    print("[{}/{}] Crawled anime list page using proxy {} ...".format(page_complete, end_page - 1, proxy_ip))
-                
                 for anime in anime_list:
                     if not anime in a_to_z_list:
                         a_to_z_list.append(anime)
                 
                 page_complete += 1
+                
+                if log:
+                    print("[{}/{}] Crawled anime list page using proxy {} ...".format(page_complete, end_page, proxy_ip))
         
         return a_to_z_list
 

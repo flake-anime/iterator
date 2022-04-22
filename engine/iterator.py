@@ -2,17 +2,6 @@ from engine.scrappers.gogoanime_scrapper import GogoAnimeScrapper
 
 scrapper = GogoAnimeScrapper()
 
-def get_a_to_z_list(start_page, end_page, max_workers, log = False, proxy = False):
-    end_page = end_page + 1
-    a_to_z_list = scrapper.get_a_to_z_list(
-        start_page = start_page, 
-        end_page = end_page, 
-        max_workers = max_workers,
-        log = log, 
-        proxy = proxy
-    )
-    return a_to_z_list
-
 def get_complete_anime_info(anime_link, proxies = None):
     anime_info = scrapper.get_anime_info(anime_link, proxies)
     episode_links = scrapper.get_episodes(anime_link, proxies)
