@@ -7,6 +7,7 @@ from jikanpy import Jikan
 from urllib.parse import urlparse, urlunparse
 from urllib.parse import parse_qs
 from engine.wrappers.free_proxy_wrapper import FreeProxyListWrapper
+from concurrent.futures import ThreadPoolExecutor
 
 def connection_fail_retry(function):
     def wrapper(*args, **kwargs):
@@ -33,7 +34,12 @@ class GogoAnimeScrapper:
         self.proxy = FreeProxyListWrapper()
     
     @connection_fail_retry
-    def get_anime_list(self, page_no, proxies = None):
+    def get_anime_list(self, page_no, proxy = True):   
+        proxies = None
+        if proxy:
+            proxy_ip = self.proxy.get_random_proxy()
+            proxies = { "http": proxy_ip }
+
         page = requests.get(self.gogo_base_url + "/anime-list?page=" + str(page_no), proxies=proxies)
         soup = BeautifulSoup(page.content, 'html.parser')
         anime_components = soup.select(".listing li a", href=True)
@@ -50,39 +56,24 @@ class GogoAnimeScrapper:
 
             anime_list.append(anime)
 
-        return anime_list
+        proxy_ip = proxies["http"] if proxies else None
+        return anime_list, proxy_ip
 
-    def get_a_to_z_list(self, start_page, end_page, log = False, proxy = False):
-        page_no = start_page
-
+    def get_a_to_z_list(self, start_page, end_page, max_workers = 4, log = False, proxy = False):
         a_to_z_list = []
-        prev_a_to_z_list = 0
 
-        proxies = None
-
-        while True:
-            if page_no == end_page:
-                break
-
-            if proxy:
-                proxies = {
-                    "http": self.proxy.get_random_proxy()
-                }
-
-            if log:
-                print("[{}/{}] Getting anime list page using proxy {} ...".format(page_no, end_page, proxies["http"] if proxies else "None"))
-
-            anime_list = self.get_anime_list(page_no, proxies = proxies)
-
-            for anime in anime_list:
-                if not anime in a_to_z_list:
-                    a_to_z_list.append(anime)
-
-            if len(a_to_z_list) == prev_a_to_z_list:
-                break
-
-            prev_a_to_z_list = len(a_to_z_list)
-            page_no += 1
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            page_complete = 0
+            arguments = [i for i in range(start_page, end_page + 1)]
+            for anime_list, proxy_ip in executor.map(self.get_anime_list, arguments):
+                if log:
+                    print("[{}/{}] Crawled anime list page using proxy {} ...".format(page_complete, end_page - 1, proxy_ip))
+                
+                for anime in anime_list:
+                    if not anime in a_to_z_list:
+                        a_to_z_list.append(anime)
+                
+                page_complete += 1
         
         return a_to_z_list
 

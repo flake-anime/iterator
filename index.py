@@ -19,6 +19,7 @@ proxy = FreeProxyListWrapper()
 anime_list = get_a_to_z_list(
     start_page = START_PAGE, 
     end_page = END_PAGE, 
+    max_workers = MAX_WORKERS,
     log = True,
     proxy = True
 )
